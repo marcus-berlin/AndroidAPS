@@ -1,0 +1,50 @@
+# AAPS Builder build workflow, version 8
+#
+# Builds AAPS from the official source (github.com/nightscout/AndroidAPS), signed with your key
+# (secret KEYSTORE_SET). The build steps are in github.com/nightscout/aaps-builder, file
+# .github/workflows/aaps-builder.yml on the "release" branch, maintained by the AAPS developers.
+# This file runs the released version of those steps at every build, so your repository never
+# needs an update for them. You only replace this file when the AAPS documentation announces it
+# (for example for a new build variant).
+# Setup page: https://androidaps.readthedocs.io/en/latest/SettingUpAaps/BrowserBuildAapsBuilderSetup.html
+# Docs: https://androidaps.readthedocs.io/en/latest/SettingUpAaps/BrowserBuildAapsBuilder.html
+#
+# A build runs only when you start it (Actions -> Build AAPS -> Run workflow).
+
+name: Build AAPS
+run-name: ${{ format('Build AAPS {0} ({1})', inputs.version, inputs.variant) }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'AAPS version ("latest" = newest release)'
+        required: true
+        default: 'latest'
+        type: string
+      variant:
+        description: 'Build variant'
+        required: true
+        default: 'fullRelease'
+        type: choice
+        options:
+          - fullRelease
+          - aapsclientRelease
+          - aapsclient2Release
+          - aapsclient3Release
+          - pumpcontrolRelease
+          - fullDebug
+
+permissions:
+  contents: read
+
+jobs:
+  aaps:
+    name: AAPS
+    uses: nightscout/aaps-builder/.github/workflows/aaps-builder.yml@release
+    with:
+      version: ${{ inputs.version }}
+      variant: ${{ inputs.variant }}
+    secrets:
+      KEYSTORE_SET: ${{ secrets.KEYSTORE_SET }}
+      GDRIVE_OAUTH2: ${{ secrets.GDRIVE_OAUTH2 }}
